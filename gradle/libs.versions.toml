@@ -4,7 +4,7 @@ kotlin = "2.3.10"
 #KSP
 ksp = "2.3.12"
 #Liquid Glass
-compose = "1.10.3"
+compose = "2026.02.00"
 backdrop = "1.0.6"
 #Detekt
 detekt = "1.23.8"
