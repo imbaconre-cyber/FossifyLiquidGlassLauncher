@@ -2,7 +2,7 @@
 #jetbrains
 kotlin = "2.3.10"
 #KSP
-ksp = "2.3.12"
+ksp = "2.3.14"
 #Liquid Glass
 compose = "1.10.3"
 backdrop = "1.0.6"
