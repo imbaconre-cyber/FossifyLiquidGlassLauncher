@@ -87,6 +87,7 @@ import org.fossify.home.helpers.ITEM_TYPE_FOLDER
 import org.fossify.home.helpers.ITEM_TYPE_ICON
 import org.fossify.home.helpers.ITEM_TYPE_SHORTCUT
 import org.fossify.home.helpers.ITEM_TYPE_WIDGET
+import org.fossify.home.helpers.CrashLogger
 import org.fossify.home.helpers.IconCache
 import org.fossify.home.helpers.IconPackManager
 import org.fossify.home.helpers.IconShape
@@ -139,6 +140,7 @@ class MainActivity : SimpleActivity(), FlingListener {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        CrashLogger.install(applicationContext)
         useDynamicTheme = false
 
         super.onCreate(savedInstanceState)
