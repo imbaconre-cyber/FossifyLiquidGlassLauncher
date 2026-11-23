@@ -5,6 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/liquid_drawer_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false" />
+
     <org.fossify.commons.views.MySearchMenu
         android:id="@+id/search_bar"
         android:layout_width="match_parent"

@@ -42,6 +42,8 @@ import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.isVisible
 import androidx.core.view.iterator
 import androidx.viewbinding.ViewBinding
+import org.fossify.home.glass.bindLiquidDock
+import org.fossify.home.glass.bindLiquidDrawerBackground
 import kotlinx.collections.immutable.toImmutableList
 import org.fossify.commons.extensions.appLaunched
 import org.fossify.commons.extensions.beVisible
@@ -154,6 +156,12 @@ class MainActivity : SimpleActivity(), FlingListener {
         mAllAppsFragmentY = mScreenHeight
         mWidgetsFragmentY = mScreenHeight
         mMoveGestureThreshold = resources.getDimensionPixelSize(R.dimen.move_gesture_threshold)
+
+        // Liquid Glass: Compose-rendered glass bar behind the docked row, and drawer surface.
+        binding.liquidDockBackground.bindLiquidDock()
+        binding.liquidDockBackground.layoutParams.height = mScreenHeight / config.homeRowCount.coerceAtLeast(2)
+        binding.liquidDockBackground.requestLayout()
+        binding.allAppsFragment.liquidDrawerBackground.bindLiquidDrawerBackground()
 
         arrayOf(
             binding.allAppsFragment.root as MyFragment<*>,
