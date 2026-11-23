@@ -19,6 +19,10 @@ import org.fossify.home.BuildConfig
 import org.fossify.home.R
 import org.fossify.home.databinding.ActivitySettingsBinding
 import org.fossify.home.extensions.config
+import org.fossify.home.glass.LiquidSliderController
+import org.fossify.home.glass.bindLiquidSlider
+import org.fossify.home.helpers.IconCache
+import org.fossify.home.helpers.IconPackManager
 import org.fossify.home.helpers.MAX_COLUMN_COUNT
 import org.fossify.home.helpers.MAX_ROW_COUNT
 import org.fossify.home.helpers.MIN_COLUMN_COUNT
@@ -30,6 +34,10 @@ import kotlin.system.exitProcess
 class SettingsActivity : SimpleActivity() {
 
     private val binding by viewBinding(ActivitySettingsBinding::inflate)
+
+    private lateinit var iconSizeController: LiquidSliderController
+    private lateinit var dockCountController: LiquidSliderController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -37,6 +45,7 @@ class SettingsActivity : SimpleActivity() {
         setupEdgeToEdge(padBottomSystem = listOf(binding.settingsNestedScrollview))
         setupMaterialScrollListener(binding.settingsNestedScrollview, binding.settingsAppbar)
         setupOptionsMenu()
+        setupLiquidSliders()
     }
 
     override fun onResume() {
@@ -55,6 +64,9 @@ class SettingsActivity : SimpleActivity() {
         setupHomeRowCount()
         setupHomeColumnCount()
         setupShowHomeAppLabels()
+        setupIconPack()
+        setupIconShape()
+        refreshLiquidSliderLabels()
         setupLanguage()
         setupManageHiddenIcons()
         updateTextColors(binding.settingsHolder)
@@ -63,7 +75,8 @@ class SettingsActivity : SimpleActivity() {
             binding.settingsColorCustomizationSectionLabel,
             binding.settingsGeneralSettingsLabel,
             binding.settingsDrawerSettingsLabel,
-            binding.settingsHomeScreenLabel
+            binding.settingsHomeScreenLabel,
+            binding.settingsLiquidGlassLabel
         ).forEach {
             it.setTextColor(getProperPrimaryColor())
         }
@@ -254,6 +267,91 @@ class SettingsActivity : SimpleActivity() {
         binding.settingsShowHomeAppLabelsHolder.setOnClickListener {
             binding.settingsShowHomeAppLabels.toggle()
             config.showHomeAppLabels = binding.settingsShowHomeAppLabels.isChecked
+        }
+    }
+
+    private fun setupLiquidSliders() {
+        iconSizeController = LiquidSliderController(
+            initialValue = config.homeIconSizeScale.toFloat(),
+            valueRange = 60f..140f,
+            step = 5f
+        ).apply {
+            onValueChange = { value -> binding.settingsIconSizeValue.text = "${value.toInt()}%" }
+            onValueChangeFinished = { value ->
+                config.homeIconSizeScale = value.toInt()
+                IconCache.clear()
+            }
+        }
+
+        dockCountController = LiquidSliderController(
+            initialValue = config.dockIconCount.toFloat(),
+            valueRange = 3f..7f,
+            step = 1f
+        ).apply {
+            onValueChange = { value -> binding.settingsDockIconCountValue.text = value.toInt().toString() }
+            onValueChangeFinished = { value -> config.dockIconCount = value.toInt() }
+        }
+
+        binding.settingsIconSizeSlider.bindLiquidSlider(iconSizeController)
+        binding.settingsDockIconCountSlider.bindLiquidSlider(dockCountController)
+    }
+
+    private fun refreshLiquidSliderLabels() {
+        iconSizeController.setValue(config.homeIconSizeScale.toFloat())
+        dockCountController.setValue(config.dockIconCount.toFloat())
+        binding.settingsIconSizeValue.text = "${config.homeIconSizeScale}%"
+        binding.settingsDockIconCountValue.text = config.dockIconCount.toString()
+    }
+
+    private fun setupIconPack() {
+        val packs = IconPackManager.discover(this)
+        binding.settingsIconPack.text = packs.firstOrNull {
+            it.packageName == config.selectedIconPack
+        }?.label ?: getString(R.string.default_icon_pack)
+
+        binding.settingsIconPackHolder.setOnClickListener {
+            val items = ArrayList<RadioItem>().apply {
+                add(RadioItem(id = -1, title = getString(R.string.default_icon_pack)))
+                packs.forEachIndexed { index, pack ->
+                    add(RadioItem(id = index, title = pack.label))
+                }
+            }
+            val currentIndex = packs.indexOfFirst { it.packageName == config.selectedIconPack }
+            RadioGroupDialog(this, items, if (currentIndex < 0) -1 else currentIndex) { selected ->
+                val id = selected as Int
+                val newPack = if (id == -1) "" else packs[id].packageName
+                if (newPack != config.selectedIconPack) {
+                    config.selectedIconPack = newPack
+                    IconPackManager.reload(this)
+                    IconCache.clear()
+                }
+                setupIconPack()
+            }
+        }
+    }
+
+    private fun setupIconShape() {
+        val labels = arrayOf(
+            getString(R.string.icon_shape_default),
+            getString(R.string.icon_shape_circle),
+            getString(R.string.icon_shape_rounded_square),
+            getString(R.string.icon_shape_squircle)
+        )
+        binding.settingsIconShape.text = labels.getOrElse(config.iconShape) { labels[0] }
+
+        binding.settingsIconShapeHolder.setOnClickListener {
+            val items = ArrayList<RadioItem>()
+            labels.forEachIndexed { index, label ->
+                items.add(RadioItem(id = index, title = label))
+            }
+            RadioGroupDialog(this, items, config.iconShape) { selected ->
+                val newShape = selected as Int
+                if (newShape != config.iconShape) {
+                    config.iconShape = newShape
+                    IconCache.clear()
+                }
+                setupIconShape()
+            }
         }
     }
 

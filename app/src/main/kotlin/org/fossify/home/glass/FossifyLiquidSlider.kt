@@ -37,14 +37,26 @@ import com.kyant.backdrop.effects.vibrancy
 class LiquidSliderController(
     initialValue: Float,
     val valueRange: ClosedFloatingPointRange<Float> = 0f..100f,
+    val step: Float = 1f,
     var onValueChange: ((Float) -> Unit)? = null,
     var onValueChangeFinished: ((Float) -> Unit)? = null
 ) {
-    val value = mutableStateOf(initialValue.coerceIn(valueRange))
+    val value = mutableStateOf(quantize(initialValue))
+
+    private fun quantize(input: Float): Float {
+        if (step <= 0f) return input.coerceIn(valueRange)
+        val steps = ((input - valueRange.start) / step).toInt()
+        return (valueRange.start + steps * step).coerceIn(valueRange)
+    }
+
+    fun setValue(newValue: Float) {
+        value.value = quantize(newValue)
+    }
+
     fun update(newValue: Float, finished: Boolean) {
-        val coerced = newValue.coerceIn(valueRange)
-        value.value = coerced
-        if (finished) onValueChangeFinished?.invoke(coerced) else onValueChange?.invoke(coerced)
+        val quantized = quantize(newValue)
+        value.value = quantized
+        if (finished) onValueChangeFinished?.invoke(quantized) else onValueChange?.invoke(quantized)
     }
 }
 

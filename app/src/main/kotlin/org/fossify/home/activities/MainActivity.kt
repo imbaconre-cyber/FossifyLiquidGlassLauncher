@@ -88,6 +88,8 @@ import org.fossify.home.helpers.ITEM_TYPE_ICON
 import org.fossify.home.helpers.ITEM_TYPE_SHORTCUT
 import org.fossify.home.helpers.ITEM_TYPE_WIDGET
 import org.fossify.home.helpers.IconCache
+import org.fossify.home.helpers.IconPackManager
+import org.fossify.home.helpers.IconShape
 import org.fossify.home.helpers.REQUEST_ALLOW_BINDING_WIDGET
 import org.fossify.home.helpers.REQUEST_CONFIGURE_WIDGET
 import org.fossify.home.helpers.REQUEST_CREATE_SHORTCUT
@@ -157,7 +159,8 @@ class MainActivity : SimpleActivity(), FlingListener {
         mWidgetsFragmentY = mScreenHeight
         mMoveGestureThreshold = resources.getDimensionPixelSize(R.dimen.move_gesture_threshold)
 
-        // Liquid Glass: Compose-rendered glass bar behind the docked row, and drawer surface.
+        // Liquid Glass: load the selected icon pack, then render glass bar and drawer surface.
+        IconPackManager.reload(this)
         binding.liquidDockBackground.bindLiquidDock()
         binding.liquidDockBackground.layoutParams.height = mScreenHeight / config.homeRowCount.coerceAtLeast(2)
         binding.liquidDockBackground.requestLayout()
@@ -300,6 +303,10 @@ class MainActivity : SimpleActivity(), FlingListener {
             newRowCount = config.homeRowCount,
             newColumnCount = config.homeColumnCount
         )
+        binding.homeScreenGrid.root.refreshGridMetrics()
+        binding.liquidDockBackground.layoutParams.height =
+            mScreenHeight / config.homeRowCount.coerceAtLeast(2)
+        binding.liquidDockBackground.requestLayout()
         binding.homeScreenGrid.root.updateColors()
         binding.allAppsFragment.root.onResume()
     }
@@ -1112,16 +1119,19 @@ class MainActivity : SimpleActivity(), FlingListener {
             }
 
             val label = info.loadLabel(packageManager).toString()
-            val drawable = info.loadIcon(packageManager)
-                ?: getDrawableForPackageName(packageName)
+            val themedDrawable = IconPackManager.loadIcon(this, packageName, activityName)
+            val drawable = themedDrawable
+                ?: info.loadIcon(packageManager)
+                ?: getDrawableForPackageName(packageName, activityName)
                 ?: continue
 
-            val bitmap = drawable.toBitmap(
+            val rawBitmap = drawable.toBitmap(
                 width = max(drawable.intrinsicWidth, 1),
                 height = max(drawable.intrinsicHeight, 1),
                 config = Bitmap.Config.ARGB_8888
             )
-            val placeholderColor = calculateAverageColor(bitmap)
+            val shapedBitmap = IconShape.shapeBitmap(rawBitmap, config.iconShape)
+            val placeholderColor = calculateAverageColor(shapedBitmap)
             allApps.add(
                 AppLauncher(
                     id = null,
@@ -1130,7 +1140,7 @@ class MainActivity : SimpleActivity(), FlingListener {
                     activityName = activityName,
                     order = 0,
                     thumbnailColor = placeholderColor,
-                    drawable = bitmap.toDrawable(resources)
+                    drawable = shapedBitmap.toDrawable(resources)
                 )
             )
         }

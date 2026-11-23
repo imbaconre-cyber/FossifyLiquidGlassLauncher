@@ -19,6 +19,7 @@ import org.fossify.home.adapters.LaunchersAdapter
 import org.fossify.home.databinding.AllAppsFragmentBinding
 import org.fossify.home.extensions.config
 import org.fossify.home.extensions.launchApp
+import org.fossify.home.glass.bindLiquidSearchBar
 import org.fossify.home.extensions.setupDrawerBackground
 import org.fossify.home.helpers.ITEM_TYPE_ICON
 import org.fossify.home.interfaces.AllAppsListener
@@ -40,6 +41,7 @@ class AllAppsFragment(
     override fun setupFragment(activity: MainActivity) {
         this.activity = activity
         this.binding = AllAppsFragmentBinding.bind(this)
+        binding.liquidSearchBackground.bindLiquidSearchBar()
 
         binding.allAppsGrid.setOnTouchListener { _, event ->
             if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) {

@@ -15,6 +15,23 @@ const val CLOSE_APP_DRAWER = "close_app_drawer"
 const val AUTO_SHOW_KEYBOARD_IN_APP_DRAWER = "auto_show_keyboard_in_app_drawer"
 const val SHOW_DRAWER_APP_LABELS = "show_drawer_app_labels"
 const val SHOW_HOME_APP_LABELS = "show_home_app_labels"
+const val HOME_ICON_SIZE_SCALE = "home_icon_size_scale"
+const val DOCK_ICON_COUNT = "dock_icon_count"
+const val SELECTED_ICON_PACK = "selected_icon_pack"
+const val ICON_SHAPE = "icon_shape"
+
+// liquid glass customization defaults
+const val DEFAULT_ICON_SIZE_SCALE = 100
+const val MIN_ICON_SIZE_SCALE = 60
+const val MAX_ICON_SIZE_SCALE = 140
+const val DEFAULT_DOCK_ICON_COUNT = 5
+const val MIN_DOCK_ICON_COUNT = 3
+const val MAX_DOCK_ICON_COUNT = 7
+
+const val ICON_SHAPE_DEFAULT = 0
+const val ICON_SHAPE_CIRCLE = 1
+const val ICON_SHAPE_ROUNDED_SQUARE = 2
+const val ICON_SHAPE_SQUIRCLE = 3
 
 // default home screen grid size
 const val ROW_COUNT = 6

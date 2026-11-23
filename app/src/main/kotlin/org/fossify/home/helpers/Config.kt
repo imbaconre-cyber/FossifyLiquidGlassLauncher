@@ -45,4 +45,20 @@ class Config(context: Context) : BaseConfig(context) {
     var showHomeAppLabels: Boolean
         get() = prefs.getBoolean(SHOW_HOME_APP_LABELS, true)
         set(showHomeAppLabels) = prefs.edit().putBoolean(SHOW_HOME_APP_LABELS, showHomeAppLabels).apply()
+
+    var homeIconSizeScale: Int
+        get() = prefs.getInt(HOME_ICON_SIZE_SCALE, DEFAULT_ICON_SIZE_SCALE)
+        set(value) = prefs.edit().putInt(HOME_ICON_SIZE_SCALE, value).apply()
+
+    var dockIconCount: Int
+        get() = prefs.getInt(DOCK_ICON_COUNT, DEFAULT_DOCK_ICON_COUNT)
+        set(value) = prefs.edit().putInt(DOCK_ICON_COUNT, value).apply()
+
+    var selectedIconPack: String
+        get() = prefs.getString(SELECTED_ICON_PACK, "") ?: ""
+        set(value) = prefs.edit().putString(SELECTED_ICON_PACK, value).apply()
+
+    var iconShape: Int
+        get() = prefs.getInt(ICON_SHAPE, ICON_SHAPE_DEFAULT)
+        set(value) = prefs.edit().putInt(ICON_SHAPE, value).apply()
 }

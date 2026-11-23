@@ -17,6 +17,7 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.text.Layout
@@ -63,6 +64,7 @@ import org.fossify.home.helpers.ITEM_TYPE_FOLDER
 import org.fossify.home.helpers.ITEM_TYPE_ICON
 import org.fossify.home.helpers.ITEM_TYPE_SHORTCUT
 import org.fossify.home.helpers.ITEM_TYPE_WIDGET
+import org.fossify.home.helpers.IconShape
 import org.fossify.home.helpers.WIDGET_HOST_ID
 import org.fossify.home.models.HomeScreenGridItem
 import kotlin.math.abs
@@ -239,7 +241,10 @@ class HomeScreenGrid(context: Context, attrs: AttributeSet, defStyle: Int) :
             gridItems = context.homeScreenGridItemsDB.getAllItems() as ArrayList<HomeScreenGridItem>
             gridItems.toImmutableList().forEach { item ->
                 if (item.type == ITEM_TYPE_ICON) {
-                    item.drawable = context.getDrawableForPackageName(item.packageName)
+                    item.drawable = context.getDrawableForPackageName(
+                        packageName = item.packageName,
+                        activityName = item.activityName
+                    )
                 } else if (item.type == ITEM_TYPE_FOLDER) {
                     item.drawable = item.toFolder().generateDrawable()
                 } else if (item.type == ITEM_TYPE_SHORTCUT) {
@@ -276,6 +281,16 @@ class HomeScreenGrid(context: Context, attrs: AttributeSet, defStyle: Int) :
             widgetViews.clear()
             redrawGrid()
         }
+    }
+
+    /** Recalculates cell/icon geometry after icon-size or dock-count changes. */
+    fun refreshGridMetrics() {
+        cells.clear()
+        gridCenters.clear()
+        iconMargin =
+            (context.resources.getDimension(R.dimen.icon_side_margin) * 5 / columnCount).toInt()
+        fillCellSizes()
+        redrawGrid()
     }
 
     fun updateColors() {
@@ -1137,6 +1152,12 @@ class HomeScreenGrid(context: Context, attrs: AttributeSet, defStyle: Int) :
             appWidgetProviderInfo
         ) as MyAppWidgetHostView
         widgetView.tag = item.widgetId
+        widgetView.background = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = context.resources.getDimension(R.dimen.icon_side_margin) * 3
+            setColor(Color.argb(38, 255, 255, 255))
+            setStroke(1, Color.argb(70, 255, 255, 255))
+        }
         widgetView.setAppWidget(item.widgetId, appWidgetProviderInfo)
         widgetView.longPressListener = { x, y ->
             val activity = context as? MainActivity
@@ -1250,7 +1271,10 @@ class HomeScreenGrid(context: Context, attrs: AttributeSet, defStyle: Int) :
             }
 
         gridItems
-            .filter { it.isSingleCellType() && it.docked && it.parentId == null }
+            .filter {
+                it.isSingleCellType() && it.docked && it.parentId == null &&
+                    it.left < context.config.dockIconCount
+            }
             .forEach { item ->
                 if (item.outOfBounds()) {
                     return@forEach
@@ -1520,7 +1544,10 @@ class HomeScreenGrid(context: Context, attrs: AttributeSet, defStyle: Int) :
         } else {
             0
         }
-        iconSize = min(cellWidth, cellHeight) - 2 * iconMargin
+        val baseIconSize = min(cellWidth, cellHeight) - 2 * iconMargin
+        iconSize = (baseIconSize * context.config.homeIconSizeScale / 100f)
+            .roundToInt()
+            .coerceAtLeast(24)
         pageIndicatorsYPos = (rowCount - 1) * cellHeight + extraYMargin
         for (i in 0 until columnCount) {
             for (j in 0 until rowCount) {
@@ -1916,7 +1943,7 @@ class HomeScreenGrid(context: Context, attrs: AttributeSet, defStyle: Int) :
                 }
             }
 
-            drawable?.draw(this)
+            IconShape.drawShaped(this, drawable, context.config.iconShape)
         }
     }
 
@@ -1933,7 +1960,8 @@ class HomeScreenGrid(context: Context, attrs: AttributeSet, defStyle: Int) :
         filter { it.visibleOnCurrentPage() }
 
     private fun HomeScreenGridItem.visibleOnCurrentPage() =
-        (pager.isItemOnCurrentPage(this) || docked) && parentId == null
+        (pager.isItemOnCurrentPage(this) ||
+            (docked && left < context.config.dockIconCount)) && parentId == null
 
     private fun HomeScreenGridItem.isSingleCellType() =
         (type == ITEM_TYPE_ICON || type == ITEM_TYPE_SHORTCUT || type == ITEM_TYPE_FOLDER)
@@ -2003,6 +2031,24 @@ class HomeScreenGrid(context: Context, attrs: AttributeSet, defStyle: Int) :
             }
             canvas.clipPath(circlePath)
             canvas.drawPaint(folderIconBackgroundPaint)
+
+            // Liquid glass rim + soft top highlight for folder containers.
+            val rimPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.STROKE
+                color = Color.argb(110, 255, 255, 255)
+                strokeWidth = max(2f, iconSize / 32f)
+            }
+            canvas.drawPath(circlePath, rimPaint)
+            val highlightPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                shader = android.graphics.LinearGradient(
+                    0f, 0f, 0f, iconSize.toFloat(),
+                    Color.argb(70, 255, 255, 255),
+                    Color.TRANSPARENT,
+                    android.graphics.Shader.TileMode.CLAMP
+                )
+            }
+            canvas.drawPaint(highlightPaint)
+
             val folderColumnCount = ceil(sqrt(itemsCount.toDouble())).roundToInt()
             val folderRowCount = ceil(itemsCount.toFloat() / folderColumnCount).roundToInt()
             val scaledCellSize = (iconSize.toFloat() / folderColumnCount)

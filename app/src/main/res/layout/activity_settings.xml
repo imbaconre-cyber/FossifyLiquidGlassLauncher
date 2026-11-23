@@ -321,6 +321,114 @@
                     android:text="@string/show_app_labels" />
 
             </RelativeLayout>
+
+            <TextView
+                android:id="@+id/settings_liquid_glass_label"
+                style="@style/SettingsSectionLabelStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/liquid_glass_settings" />
+
+            <RelativeLayout
+                android:id="@+id/settings_icon_pack_holder"
+                style="@style/SettingsHolderTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ripple_background">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_icon_pack_label"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/icon_pack" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_icon_pack"
+                    style="@style/SettingsTextValueStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/settings_icon_pack_label"
+                    tools:text="@string/default_icon_pack" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_icon_shape_holder"
+                style="@style/SettingsHolderTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ripple_background">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_icon_shape_label"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/icon_shape" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_icon_shape"
+                    style="@style/SettingsTextValueStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/settings_icon_shape_label"
+                    tools:text="@string/icon_shape_default" />
+
+            </RelativeLayout>
+
+            <org.fossify.commons.views.MyTextView
+                android:id="@+id/settings_icon_size_label"
+                style="@style/SettingsTextLabelStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/icon_size" />
+
+            <org.fossify.commons.views.MyTextView
+                android:id="@+id/settings_icon_size_value"
+                style="@style/SettingsTextValueStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                tools:text="100%" />
+
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/settings_icon_size_slider"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp" />
+
+            <org.fossify.commons.views.MyTextView
+                android:id="@+id/settings_dock_icon_count_label"
+                style="@style/SettingsTextLabelStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/dock_icon_count" />
+
+            <org.fossify.commons.views.MyTextView
+                android:id="@+id/settings_dock_icon_count_value"
+                style="@style/SettingsTextValueStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                tools:text="5" />
+
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/settings_dock_icon_count_slider"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginBottom="16dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

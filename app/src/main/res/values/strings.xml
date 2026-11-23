@@ -19,6 +19,16 @@
     <string name="double_tap_to_lock">Double tap to lock screen</string>
     <string name="lock_device_admin_hint">To enable the double tap to lock screen feature, you need to grant admin permission. Note that the app cannot be uninstalled until this permission is removed.</string>
     <string name="lock_device_admin_warning">Deactivating admin permission will disable the double tap to lock screen feature.</string>
+    <string name="liquid_glass_settings">Liquid glass</string>
+    <string name="icon_pack">Icon pack</string>
+    <string name="default_icon_pack">System default</string>
+    <string name="icon_shape">Icon shape</string>
+    <string name="icon_shape_default">Default</string>
+    <string name="icon_shape_circle">Circle</string>
+    <string name="icon_shape_rounded_square">Rounded square</string>
+    <string name="icon_shape_squircle">Squircle</string>
+    <string name="icon_size">Icon size</string>
+    <string name="dock_icon_count">Icons in dock</string>
     <!--
         Haven't found some strings? There's more at
         https://github.com/FossifyOrg/Commons/tree/master/commons/src/main/res
