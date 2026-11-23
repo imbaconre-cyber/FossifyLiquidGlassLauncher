@@ -1,5 +1,6 @@
 package org.fossify.home.glass
 
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -78,6 +79,7 @@ fun FossifyLiquidSlider(
     val blurPx = with(density) { 8.dp.toPx() }
     val thumbPx = with(density) { thumbSize.toPx() }
     val halfThumb = thumbPx / 2f
+    val fullGlass = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
     val trackWidth = remember { mutableFloatStateOf(0f) }
 
@@ -95,11 +97,11 @@ fun FossifyLiquidSlider(
             (controller.valueRange.endInclusive - controller.valueRange.start)
     }
 
+    val rootModifier = if (fullGlass) modifier.layerBackdrop(backdrop) else modifier
     Box(
-        modifier = modifier
+        modifier = rootModifier
             .fillMaxWidth()
             .height(thumbSize + 12.dp)
-            .layerBackdrop(backdrop)
             .onSizeChanged { trackWidth.value = it.width.toFloat() }
             .pointerInput(Unit) {
                 detectDragGestures(
@@ -127,22 +129,27 @@ fun FossifyLiquidSlider(
         val activeWidth = (width * fraction.coerceIn(0f, 1f)).coerceAtLeast(0f)
         val thumbOffset = valueToOffset(controller.value.value, width)
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(trackHeight)
-                .align(Alignment.Center)
-                .drawBackdrop(
-                    backdrop = backdrop,
-                    shape = { RoundedCornerShape(trackHeight) },
-                    effects = {
-                        vibrancy()
-                        blur(blurPx)
-                        lens(16f, 24f, true)
-                    },
-                    onDrawSurface = { drawRect(inactiveColor) }
-                )
-        )
+        val trackModifier = Modifier
+            .fillMaxWidth()
+            .height(trackHeight)
+            .align(Alignment.Center)
+            .let { base ->
+                if (fullGlass) {
+                    base.drawBackdrop(
+                        backdrop = backdrop,
+                        shape = { RoundedCornerShape(trackHeight) },
+                        effects = {
+                            vibrancy()
+                            blur(blurPx)
+                            lens(16f, 24f, true)
+                        },
+                        onDrawSurface = { drawRect(inactiveColor) }
+                    )
+                } else {
+                    base.background(inactiveColor, RoundedCornerShape(trackHeight))
+                }
+            }
+        Box(modifier = trackModifier)
 
         Box(
             modifier = Modifier
@@ -152,21 +159,26 @@ fun FossifyLiquidSlider(
                 .background(activeColor, RoundedCornerShape(trackHeight))
         )
 
-        Box(
-            modifier = Modifier
-                .size(thumbSize)
-                .align(Alignment.CenterStart)
-                .offset(x = with(density) { thumbOffset.toDp() - halfThumb.toDp() })
-                .drawBackdrop(
-                    backdrop = backdrop,
-                    shape = { CircleShape },
-                    effects = {
-                        vibrancy()
-                        blur(4f)
-                        lens(12f, 18f, true)
-                    },
-                    onDrawSurface = { drawRect(Color.White.copy(alpha = 0.85f)) }
-                )
-        )
+        val thumbModifier = Modifier
+            .size(thumbSize)
+            .align(Alignment.CenterStart)
+            .offset(x = with(density) { thumbOffset.toDp() - halfThumb.toDp() })
+            .let { base ->
+                if (fullGlass) {
+                    base.drawBackdrop(
+                        backdrop = backdrop,
+                        shape = { CircleShape },
+                        effects = {
+                            vibrancy()
+                            blur(4f)
+                            lens(12f, 18f, true)
+                        },
+                        onDrawSurface = { drawRect(Color.White.copy(alpha = 0.85f)) }
+                    )
+                } else {
+                    base.background(Color.White.copy(alpha = 0.85f), CircleShape)
+                }
+            }
+        Box(modifier = thumbModifier)
     }
 }

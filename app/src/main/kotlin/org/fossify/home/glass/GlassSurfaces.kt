@@ -1,5 +1,6 @@
 package org.fossify.home.glass
 
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,9 @@ import com.kyant.backdrop.effects.vibrancy
 /**
  * Glass panel built directly on Kyant0's backdrop modifiers (AndroidLiquidGlass 1.0.6).
  * No high-level widgets are shipped by that library, so all surfaces here are custom.
+ *
+ * Backdrop capture/RenderEffect is only used on API 33+. Older devices get a static
+ * tinted surface, which keeps the launcher stable on Samsung/Exynos API 31 builds.
  */
 @Composable
 fun LiquidGlassPanel(
@@ -36,10 +40,29 @@ fun LiquidGlassPanel(
     tint: Color = Color.White.copy(alpha = 0.14f),
     content: @Composable () -> Unit = {}
 ) {
-    val backdrop = rememberLayerBackdrop()
     val density = LocalDensity.current
     val blurPx = with(density) { blurRadius.toPx() }
+    val fullGlass = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
+    if (!fullGlass) {
+        Box(
+            modifier = modifier
+                .clip(shape)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.20f),
+                            tint
+                        )
+                    )
+                )
+        ) {
+            content()
+        }
+        return
+    }
+
+    val backdrop = rememberLayerBackdrop()
     Box(modifier = modifier.layerBackdrop(backdrop)) {
         Box(
             modifier = Modifier
@@ -82,10 +105,39 @@ fun LiquidGlassDrawer(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    val backdrop = rememberLayerBackdrop()
     val density = LocalDensity.current
     val blurPx = with(density) { 24.dp.toPx() }
+    val drawerShape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+    val fullGlass = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
+    if (!fullGlass) {
+        Box(modifier = modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier.fillMaxSize().background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF16213E),
+                            Color(0xFF1A1A2E),
+                            Color(0xFF0F3460)
+                        ),
+                        start = Offset(0f, 0f),
+                        end = Offset(0f, 1200f)
+                    )
+                )
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(drawerShape)
+                    .background(Color.White.copy(alpha = 0.10f))
+            ) {
+                content()
+            }
+        }
+        return
+    }
+
+    val backdrop = rememberLayerBackdrop()
     Box(modifier = modifier.fillMaxSize().layerBackdrop(backdrop)) {
         // A soft wallpaper-ish gradient gives the backdrop something to refract on all APIs.
         Box(
@@ -106,7 +158,7 @@ fun LiquidGlassDrawer(
                 .fillMaxSize()
                 .drawBackdrop(
                     backdrop = backdrop,
-                    shape = { RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp) },
+                    shape = { drawerShape },
                     effects = {
                         vibrancy()
                         blur(blurPx)
