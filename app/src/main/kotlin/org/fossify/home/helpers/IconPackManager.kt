@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import androidx.core.content.res.ResourcesCompat
+import org.fossify.home.extensions.config
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 
